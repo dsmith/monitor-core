@@ -354,6 +354,7 @@ Ganglia_udp_send_channels_create( Ganglia_pool p, Ganglia_gmond_config config )
       apr_pool_create(&pool, context);
 
       /* Join the specified multicast channel */
+      int ignore = 0;
       if( mcast_join )
         {
           /* We'll be listening on a multicast channel */
@@ -373,12 +374,14 @@ Ganglia_udp_send_channels_create( Ganglia_pool p, Ganglia_gmond_config config )
             {
               err_msg("Unable to create UDP client for %s:%d. Often means there is no route to IP. Exiting.\n",
                       host? host: "NULL", port);
-              exit(1);
+              ignore = 1;
             }
         }
-
-      /* Add the socket to the array */
-      *(apr_socket_t **)apr_array_push(send_channels) = socket;
+      if(!ignore)
+        {
+          /* Add the socket to the array */
+          *(apr_socket_t **)apr_array_push(send_channels) = socket;
+        }
     }
 
   return (Ganglia_udp_send_channels)send_channels;
